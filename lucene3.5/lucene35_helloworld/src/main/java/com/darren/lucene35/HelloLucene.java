@@ -46,7 +46,7 @@ public class HelloLucene {
                 // 3、创建Document对象
                 Document document = new Document();
 
-                // 4、位Document添加Field
+                // 4、为Document添加Field
                 document.add(new Field("content", new FileReader(file)));
                 document.add(new Field("filename", file.getName(), Field.Store.YES, Field.Index.NOT_ANALYZED));
                 document.add(new Field("filepath", file.getAbsolutePath(), Field.Store.YES, Field.Index.NOT_ANALYZED));

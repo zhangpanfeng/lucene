@@ -1,4 +1,4 @@
-package com.darren.lucene35;
+package com.darren.lucene45;
 
 import org.junit.Test;
 
@@ -8,11 +8,5 @@ public class HelloLuceneTest {
     public void testIndex() {
         HelloLucene helloLucene = new HelloLucene();
         helloLucene.index();
-    }
-
-    @Test
-    public void testSearcher() {
-        HelloLucene helloLucene = new HelloLucene();
-        helloLucene.searcher();
     }
 }
