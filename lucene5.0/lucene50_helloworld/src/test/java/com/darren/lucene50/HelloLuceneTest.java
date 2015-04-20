@@ -8,4 +8,10 @@ public class HelloLuceneTest {
         HelloLucene helloLucene = new HelloLucene();
         helloLucene.index();
     }
+
+    @Test
+    public void testSearch() {
+        HelloLucene helloLucene = new HelloLucene();
+        helloLucene.search();
+    }
 }

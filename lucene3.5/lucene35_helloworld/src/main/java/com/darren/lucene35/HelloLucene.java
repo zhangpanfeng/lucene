@@ -62,8 +62,8 @@ public class HelloLucene {
                 if (indexWriter != null) {
                     indexWriter.close();
                 }
-            } catch (Exception e1) {
-                e1.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -71,7 +71,7 @@ public class HelloLucene {
     /**
      * 搜索
      */
-    public void searcher() {
+    public void search() {
         IndexReader indexReader = null;
         try {
             // 1、创建Directory
@@ -83,7 +83,7 @@ public class HelloLucene {
             // 4、创建搜索的Query
             // 使用默认的标准分词器
             Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
-            
+
             // 在content中搜索Darren
             // 创建parser来确定要搜索文件的内容，第二个参数为搜索的域
             QueryParser queryParser = new QueryParser(Version.LUCENE_35, "content", analyzer);
@@ -108,8 +108,8 @@ public class HelloLucene {
                 if (indexReader != null) {
                     indexReader.clone();
                 }
-            } catch (Exception e1) {
-                e1.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

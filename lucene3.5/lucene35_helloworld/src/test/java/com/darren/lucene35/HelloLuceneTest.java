@@ -11,8 +11,8 @@ public class HelloLuceneTest {
     }
 
     @Test
-    public void testSearcher() {
+    public void testSearch() {
         HelloLucene helloLucene = new HelloLucene();
-        helloLucene.searcher();
+        helloLucene.search();
     }
 }
