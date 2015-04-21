@@ -9,6 +9,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -147,6 +148,192 @@ public class IndexUtil {
                 e.printStackTrace();
             }
         }
+    }
 
+    /**
+     * 删除索引
+     */
+    public static void delete() {
+        IndexWriter indexWriter = null;
+        try {
+            Directory directory = FSDirectory.open(new File("F:/test/lucene/index"));
+            Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_35, analyzer);
+            indexWriter = new IndexWriter(directory, indexWriterConfig);
+            /**
+             * 参数是一个选项，可以是一个Query，也可以是一个term，term是一个精确查找的值
+             * 
+             * 此时删除的文档并不会被完全删除，而是存储在一个回收站中的，可以恢复
+             */
+
+            // 方式一：通过Term删除
+
+            /**
+             * 注意Term构造器的意思，第一个参数为Field，第二个参数为Field的值
+             */
+            indexWriter.deleteDocuments(new Term("id", "1"));
+
+            // 方式二：通过Query删除
+
+            /**
+             * 这里就要造一个Query出来，删掉查处的索引
+             */
+            QueryParser queryParser = new QueryParser(Version.LUCENE_35, "content", analyzer);
+            // 创建Query表示搜索域为content包含Lucene的文档
+            Query query = queryParser.parse("Lucene");
+
+            indexWriter.deleteDocuments(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (indexWriter != null) {
+                    indexWriter.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 更新索引
+     */
+    public static void update() {
+        IndexWriter indexWriter = null;
+        try {
+            Directory directory = FSDirectory.open(new File("F:/test/lucene/index"));
+            Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_35, analyzer);
+            indexWriter = new IndexWriter(directory, indexWriterConfig);
+            /**
+             * Lucene并没有提供更新，这里的更新操作其实是如下两个操作的合集 先删除之后再添加
+             */
+            Document document = new Document();
+            document.add(new Field("id", "11", Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
+            document.add(new Field("author", authors[0], Field.Store.YES, Field.Index.NOT_ANALYZED));
+            document.add(new Field("title", titles[0], Field.Store.YES, Field.Index.ANALYZED));
+            document.add(new Field("content", contents[1], Field.Store.NO, Field.Index.ANALYZED));
+            indexWriter.updateDocument(new Term("id", "1"), document);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (indexWriter != null) {
+                    indexWriter.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 检查一下索引文件
+     */
+    public static void check() {
+        IndexReader indexReader = null;
+        try {
+            Directory directory = FSDirectory.open(new File("F:/test/lucene/index"));
+            indexReader = IndexReader.open(directory);
+            // 通过reader可以有效的获取到文档的数量
+            // 有效的索引文档
+            System.out.println("有效的索引文档:" + indexReader.numDocs());
+            // 总共的索引文档
+            System.out.println("总共的索引文档:" + indexReader.maxDoc());
+            // 删掉的索引文档，其实不恰当，应该是在回收站里的索引文档
+            System.out.println("删掉的索引文档:" + indexReader.numDeletedDocs());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (indexReader != null) {
+                    indexReader.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 恢复删除的索引
+     */
+    public static void unDelete() {
+        // 使用IndexReader进行恢复
+        IndexReader indexReader = null;
+        try {
+            Directory directory = FSDirectory.open(new File("F:/test/lucene/index"));
+            // 恢复时，必须把IndexReader的只读(readOnly)设置为false
+            // 索引没有改变可以使用true，但现在是恢复删除的索引，显然是改变过的，所以只能是false
+            indexReader = IndexReader.open(directory, false);
+            indexReader.undeleteAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (indexReader != null) {
+                    indexReader.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 合并索引
+     */
+    public static void merge() {
+        IndexWriter indexWriter = null;
+        try {
+            Directory directory = FSDirectory.open(new File("F:/test/lucene/index"));
+            Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_35, analyzer);
+            indexWriter = new IndexWriter(directory, indexWriterConfig);
+            // 会将索引合并为2段，这两段中的被删除的数据会被清空
+            /**
+             * 特别注意：
+             * 
+             * 此处Lucene在3.5之后不建议使用，因为会消耗大量的开销，Lucene会根据情况自动处理的
+             */
+
+            // 把索引合并为两段
+            indexWriter.forceMerge(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (indexWriter != null) {
+                    indexWriter.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 强制删除
+     */
+    public static void forceDelete() {
+        IndexWriter indexWriter = null;
+        try {
+            Directory directory = FSDirectory.open(new File("F:/test/lucene/index"));
+            Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_35, analyzer);
+            indexWriter = new IndexWriter(directory, indexWriterConfig);
+            indexWriter.forceMergeDeletes();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (indexWriter != null) {
+                    indexWriter.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
