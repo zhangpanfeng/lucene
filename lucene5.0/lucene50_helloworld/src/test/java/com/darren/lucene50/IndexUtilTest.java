@@ -12,4 +12,21 @@ public class IndexUtilTest {
     public void testSearch() {
         IndexUtil.search();
     }
+
+    @Test
+    public void testCheck() {
+        IndexUtil.check();
+    }
+
+    @Test
+    public void testDelete() {
+        IndexUtil.delete();
+        IndexUtil.check();
+    }
+
+    @Test
+    public void testUnDelete() {
+        IndexUtil.unDelete();
+        IndexUtil.check();
+    }
 }
